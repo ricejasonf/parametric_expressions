@@ -1,5 +1,5 @@
 CXX_COMPILER=../build/bin/clang++
-LIST = 0 1 2 3 4 5 6 7 8 9
+LIST = 0 1 2 3 4 5 6 7 8 9 10
 targets = $(addprefix test, $(LIST))
 define make-test-target
   test$1: test$1.cpp
