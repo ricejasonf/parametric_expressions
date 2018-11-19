@@ -1,9 +1,10 @@
+#include <cstdlib>
 #include <iostream>
 
 using if_(auto cond, using auto a, using auto b) {
   int x = 5;
-  if (cond) return a;
-  else      return b + 5;
+  if (cond) return a + x;
+  else      return b + x;
 }
 
 using print(auto t) {
