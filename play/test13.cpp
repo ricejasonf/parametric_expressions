@@ -1,4 +1,4 @@
-#include <cassert>
+//#include <cassert>
 
 struct foo {
   int value;

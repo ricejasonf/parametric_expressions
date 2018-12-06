@@ -6,7 +6,7 @@ struct foo;
 
 template <unsigned long ...i>
 struct foo<index_sequence<i...>> {
-  using apply(auto ...x) {
+  static using apply(auto ...x) {
     static_assert(sizeof...(i) == 5);
     static_assert(sizeof...(x) == 3);
     // should fail because the pack sizes are different

@@ -11,7 +11,7 @@ struct foo;
 
 template <unsigned long ...i>
 struct foo<std::index_sequence<i...>> {
-  using apply(auto ...x) {
+  static using apply(auto ...x) {
     static_assert(sizeof...(x) == 3);
     return ((x + i) + ...);
   }

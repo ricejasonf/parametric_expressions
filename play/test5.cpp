@@ -1,7 +1,7 @@
 #include <iostream>
 
 struct foo {
-  using apply(auto x, auto y) {
+  static using apply(auto x, auto y) {
     return x + y;
   }
 };
