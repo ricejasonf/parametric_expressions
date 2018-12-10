@@ -15,6 +15,9 @@ define make-test-target
 		gdb \
 			-ex "set follow-fork-mode child" \
 			--args ${CXX_COMPILER} -g -O0 -S -std=c++2a -stdlib=libc++ test$1.cpp -o ./build/test$1.s
+
+  run_test$1: test$1
+		./build/test$1
 endef
 
 $(foreach element,$(LIST),$(eval $(call make-test-target,$(element))))

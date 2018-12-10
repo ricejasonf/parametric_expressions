@@ -13,8 +13,8 @@ template <typename T>
 struct foo {
   int value;
 
-  using apply(using auto f, auto ...x) {
-    return f(value, x...);
+  using apply(auto self, using auto f, auto ...x) {
+    return f(self.value, x...);
   }
 };
 

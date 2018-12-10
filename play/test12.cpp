@@ -3,8 +3,8 @@
 struct foo {
   int value;
 
-  using add(using auto x) {
-    return foo{x.value + value};
+  using add(using auto self, using auto x) {
+    return foo{x.value + self.value};
   }
 };
 

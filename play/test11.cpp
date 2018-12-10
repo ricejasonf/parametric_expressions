@@ -3,8 +3,8 @@
 struct foo {
   int value;
 
-  using or_(using auto x) {
-    if (value) return *this;
+  using or_(auto self, using auto x) {
+    if (self.value) return self;
     else return foo{x};
   }
 };
