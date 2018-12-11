@@ -13,13 +13,11 @@ struct foo {
 };
 
 int main() {
-  /*
   int x = foo<int>{}.bar();
   int y = foo<int>::apply(40, 2);
 
   foo<long> foo_const = {};
   int z = foo_const.baz();
   int zz = foo_const.apply(40, 2);
-  */
-  int z = foo<int>{}.baz();
+  int zzz = foo<int>{}.baz();
 }
