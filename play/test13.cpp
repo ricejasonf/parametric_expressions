@@ -1,5 +1,29 @@
 #include <cassert>
 
+template <bool = true>
+struct constexpr_if_detail {
+  static using apply(using auto a, using auto) {
+    return a;
+  }
+};
+
+template <>
+struct constexpr_if_detail<false> {
+  static using apply(using auto, using auto b) {
+    return b;
+  }
+};
+
+struct constexpr_if_fn {
+  using operator()(using auto self, using auto cond,
+                                 // ^ TODO make constexpr
+                   using auto a, using auto b) {
+    // FIXME `apply` does not refer to a value??
+    //return constexpr_if_detail<cond>::apply(a, b);
+    return constexpr_if_detail<cond>{}.apply(a, b);
+  }
+} inline constexpr_if{};
+
 namespace blah {
   struct foo {
     int value;
@@ -8,6 +32,12 @@ namespace blah {
     using operator||(auto self, using auto x) {
       if (self.value) return self;
       else return foo{x};
+    }
+
+    using operator++(auto self, using auto ...tag) {
+      return constexpr_if(sizeof...(tag) == 0,
+                          (self.value++, self),
+                          foo{self.value++});
     }
   };
 
@@ -47,5 +77,17 @@ int main() {
 
     foo result2 = foo{0} && foo{6};
     assert(result2 == foo{0});
+  }
+
+  // unary
+
+  {
+    foo result1 = foo{5}++;
+    assert(result1 == foo{5});
+
+    /* FIXME explodes because of parameter pack
+    foo result2 = ++foo{5};
+    assert(result1 == foo{6});
+    */
   }
 }
