@@ -17,9 +17,7 @@ struct constexpr_if_detail<false> {
 struct constexpr_if_fn {
   using operator()(using auto self, using auto cond,
                    using auto a, using auto b) {
-    return constexpr_if_detail<cond>{}.apply(a, b);
-    // FIXME `apply` does not refer to a value??
-    //return constexpr_if_detail<cond>::apply(a, b);
+    return constexpr_if_detail<cond>::apply(a, b);
   }
 } inline constexpr_if{};
 
