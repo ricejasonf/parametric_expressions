@@ -15,7 +15,7 @@ struct constexpr_if_detail<false> {
 };
 
 struct constexpr_if_fn {
-  using operator()(using auto self, using auto cond,
+  using operator()(using auto self, constexpr auto cond,
                    using auto a, using auto b) {
     return constexpr_if_detail<cond>::apply(a, b);
   }
