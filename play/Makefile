@@ -9,7 +9,7 @@ define make-test-target
 		${CXX_COMPILER} -g -O0 -S -emit-llvm -std=c++2a -stdlib=libc++ test$1.cpp -o ./build/test$1.ll
 
   ast_test$1: test$1.cpp
-		${CXX_COMPILER} -g -O0 -ast-dump -std=c++2a -stdlib=libc++ test$1.cpp -o ./build/test$1.s
+		${CXX_COMPILER} -g -O0 -emit-ast -std=c++2a -stdlib=libc++ test$1.cpp -o ./build/test$1.s
 
   gdb_test$1: test$1.cpp
 		gdb \
