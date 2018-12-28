@@ -14,6 +14,15 @@ using sum(using auto ...xs) {
   return (xs + ...);
 }
 
+template <template<int ...> class T>
+constexpr auto dependent = [] {
+  assert((drop_front(void(1), void(2), void(3), 4), ...) == 4);
+  type_seq<T<2>,
+           T<3>,
+           T<4>> types
+    = type_seq<T<drop_front(1, 2, 3, 4)>...>{};
+};
+
 int main() {
   // call expression
   int x = sum(drop_front(1, 2, 3, 4)...);
@@ -44,4 +53,6 @@ int main() {
            int,
            int       > types_2
     = type_seq<decltype(drop_front(1, 2, 3, 4))...>{};
+
+  dependent<int_seq>();
 }
