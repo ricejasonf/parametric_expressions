@@ -21,10 +21,17 @@ FROM ricejasonf/cppdock as parmexpr_build
       /opt/src/llvm \
    && make -j4 && make install
 
+  # Include Metabench for convenience
+  WORKDIR /opt/src
+  RUN cppdock install_src ad7b519b3ab8b67e5ce3ceccf0d4cd8d77c52cf4 \
+                          ldionne/metabench ./metabench
+
 FROM ricejasonf/cppdock
   RUN  apt-get update && apt-get -yq install libc++1
 
   COPY --from=parmexpr_build /usr/local/lib /usr/local/lib
   COPY --from=parmexpr_build /usr/local/include /usr/local/include
   COPY --from=parmexpr_build /usr/local/bin /usr/local/bin
+  COPY --from=parmexpr_build /opt/src/metabench/metabench.cmake \
+    /opt/metabench.cmake
   COPY toolchain.cmake /opt/toolchain.cmake
