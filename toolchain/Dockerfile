@@ -2,7 +2,7 @@ FROM ricejasonf/cppdock as parmexpr_build
   WORKDIR /opt/src
   RUN cppdock install_src e90d44039a60317e8379232d5c43dc06cef8f463 \
                           llvm-mirror/llvm      ./llvm
-  RUN cppdock install_src 7a4b1568bb1f31e61b014512a8fcf54af06cf173 \
+  RUN cppdock install_src b071b58e41df2940537e9804a713df8472d2574d \
                           ricejasonf/clang      ./llvm/tools/clang
   RUN cppdock install_src 61b0a0088b54793b2d4e7fc2f1b1a1f3893293a8 \
                           llvm-mirror/libcxx    ./llvm/projects/libcxx
@@ -27,7 +27,7 @@ FROM ricejasonf/cppdock as parmexpr_build
                           ldionne/metabench ./metabench
 
 FROM ricejasonf/cppdock
-  RUN  apt-get update && apt-get -yq install libc++1
+  RUN  apt-get update && apt-get -yq install libc++1 ruby
 
   COPY --from=parmexpr_build /usr/local/lib /usr/local/lib
   COPY --from=parmexpr_build /usr/local/include /usr/local/include
@@ -35,3 +35,4 @@ FROM ricejasonf/cppdock
   COPY --from=parmexpr_build /opt/src/metabench/metabench.cmake \
     /opt/metabench.cmake
   COPY toolchain.cmake /opt/toolchain.cmake
+  RUN  ln -s /usr/local /opt/sysroot
