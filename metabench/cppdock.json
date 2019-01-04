@@ -1,0 +1,27 @@
+{
+  "cppdock": {
+    "name": "parmexpr_metabench"
+  },
+  "platforms": {
+    "parmexpr": {
+      "base_image": "ricejasonf/parmexpr",
+      "type": "linux_x64",
+      "deps": [
+        [
+          {
+            "name": "boostorg/hana",
+            "tag": "develop",
+            "revision": "30e09ad3006d18d8d40a8be466d6e1e160315e4c"
+          }
+        ],
+        [
+          {
+            "name": "ricejasonf/hana",
+            "tag": "parmexpr",
+            "revision": "9f6ce7e06b57e1a009d46d3a88eb99d32f51979a"
+          }
+        ]
+      ]
+    }
+  }
+}
