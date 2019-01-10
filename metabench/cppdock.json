@@ -18,7 +18,20 @@
           {
             "name": "ricejasonf/hana",
             "tag": "parmexpr",
-            "revision": "9f6ce7e06b57e1a009d46d3a88eb99d32f51979a"
+            "revision": "2ecfdda4ae222551c9896255e6b52885116a3cbf"
+          }
+        ]
+      ]
+    },
+    "vanilla": {
+      "base_image": "ricejasonf/parmexpr:vanilla",
+      "type": "linux_x64",
+      "deps": [
+        [
+          {
+            "name": "boostorg/hana",
+            "tag": "develop",
+            "revision": "30e09ad3006d18d8d40a8be466d6e1e160315e4c"
           }
         ]
       ]
