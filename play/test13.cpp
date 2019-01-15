@@ -1,5 +1,8 @@
 #include <cassert>
 
+template <typename T>
+auto decay(T&& t) { return t; }
+
 template <bool = true>
 struct constexpr_if_detail {
   static using apply(using auto a, using auto) {
@@ -27,7 +30,7 @@ namespace blah {
 
     // member candidate
     using operator||(auto self, using auto x) {
-      if (self.value) return self;
+      if (self.value) return decay(self);
       else return foo{x};
     }
 
@@ -47,7 +50,7 @@ namespace blah {
 // non-member candidate
 using operator&&(auto self, using auto x) {
   if (self.value) return blah::foo{x};
-  else return self;
+  else return decay(self);
 }
 
 int main() {
