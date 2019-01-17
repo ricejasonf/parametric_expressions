@@ -1,7 +1,7 @@
 FROM ricejasonf/cppdock as parmexpr_build
   WORKDIR /opt/src
-  COPY ./install_src.sh .
-  RUN ./install_src.sh
+  COPY ./install_src_vanilla.sh .
+  RUN ./install_src_vanilla.sh
 
   RUN  apt-get update && apt-get -yq install build-essential
 
