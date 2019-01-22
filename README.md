@@ -11,4 +11,4 @@ In addition to the tests in `./play` you can try out the reference implementatio
 
 You can also use [CppDock](https://github.com/ricejasonf/cppdock) to build the compiler in a docker container in `./toolchain`.
 
-There are also compile-time benchmarks that can be built found in `./metabench`. Results will be posted on the [Blog]().
+There are also compile-time benchmarks that can be built found in `./metabench`. Results will be posted on the [Blog](https://ricejasonf.github.io/parametric_expressions/).
