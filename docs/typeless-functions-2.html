@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="twitter:title" content="Typeless Functions (part 2)">
+  <meta name="twitter:description" content="Concise Forwarding">
+  <meta name="twitter:site" content="@JasonRice_">
+  <meta name="twitter:creator" content="@JasonRice_">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://ricejasonf.github.io/parametric_expressions/jason_profile.jpg">
+
+  <!-- UIkit CSS -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.0/css/uikit.min.css" />
+  <link rel="stylesheet" href="style.css" />
+
+  <title>Typeless Functions (part 2)</title>
+  <style>
+    .syntax {
+      color:#000000;
+    }
+  </style>
+</head>
+<body>
+<body>
+  <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+    <nav class="uk-navbar uk-margin-large-bottom">
+        <a class="uk-navbar-brand uk-hidden-small"
+           href="index.html">
+          Parametric Expressions</a>
+        <ul class="uk-navbar-nav uk-hidden-small">
+            <li class="uk-active">
+                <a href="index.html">Blog</a>
+            </li>
+            <li>
+                <a href="https://github.com/ricejasonf/parametric_expressions">Github</a>
+            </li>
+            <li>
+                <a href="https://godbolt.org/z/Zo9ozy">Godbolt</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="uk-grid" data-uk-grid-margin>
+        <div class="uk-width-medium-3-4">
+            <article class="uk-article">
+                <h1 class="uk-article-title">
+                    <a href="#">Typeless Functions (part 2)</a>
+                </h1>
+                <p class="uk-article-meta">
+                  Written by Jason Rice on 25 January 2019.
+                </p>
+                <p>The topic of this blog is an experimental language feature called <i>Parametric Expressions</i>, but it's fun to call them "type less" functions as they have no type and they can lead to more concise code.
+                </p>
+                <p>In the previous post we looked at how parametric expressions can return unexpanded parameter packs. It was brought to my attention that people don't know what parametric expressions are. For a complete description check out the proposal paper here: <a href="https://github.com/ricejasonf/parametric_expressions/blob/master/d1221.md">P1221</a>.
+								</p>
+								<p>However, for the sake of TLDR, I will start this post off with a brief explanation and the declaration syntax. Then I'll demonstrate how parametric expressions can be used to pass <i>id-expressions</i> which enables users to write more concise code without adding special operators to the language. For this post specifically we'll cover concise forwarding</p>
+                <p>Basically parametric expressions are a hygienic macro that occur during semantic analysis and template instantiation. To prevent duplicate evaluation, the default behaviour is to bind arguments to parameters which are evaluated as they appear from left to right.
+								</p>
+								<p>Here is a very simple example of the declaration syntax:
+                </p>
+<pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> foo<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> x<span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+								<p>It is important to note that the <span class="syntax">auto</span> in the parameter declaration is not a type but a constraint. Please ignore it for now and know that parameters are implicitly <span class="syntax">auto&&</span> as is typically seen in generic code.
+								</p>
+								<p>When called, <span class="syntax">foo</span> is evaluated with its own RAII scope without any kind of function call. Think of it as behaving like a compound statement that returns a value.
+								</p>
+								<p>This can be called just like a function:
+								</p>
+<pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">int</span> x <span style="color:#808030; ">=</span> foo<span style="color:#808030; ">(</span><span style="color:#008c00; ">5</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+</pre>
+							  <p>Simple right? This is the default behaviour.</p>
+                <p>There are an abundance of use cases, however, where we sometimes want the parameter to behave more like a macro parameter. This means we can control evaluation and even work with what we are calling <i>placeholder expressions</i>, intermediate expressions that don't refer to an actual value. The name of an overloaded function is a good example.
+							  </p>
+                <p>For these <i>Parametric Expressions</i> adds the <span class="syntax">using</span> keyword to specify it in the parameter declaration.
+							  </p>
+<pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> foo<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> x<span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+								<p>This version of <span class="syntax">foo</span> behaves the same as before, but now there is no need for a RAII scope because there is no actual parameter, but <span class="syntax">x</span> is substituted with the input expression everywhere it is found in the body. This allows for a transparent AST transformation so the compiler treats it as the expression in the return statement.
+								</p>
+								<h2>Concise Forwarding</h2>
+								<p>Consider the following Tony Table:</p>
+<div class="uk-grid tony-table">
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">template</span> <span style="color:#800080; ">&lt;</span><span style="color:#800000; font-weight:bold; ">typename</span> X<span style="color:#800080; ">&gt;</span>
+decltype<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">)</span> foo<span style="color:#808030; ">(</span>X<span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>forward<span style="color:#800080; ">&lt;</span>X<span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> foo<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> x<span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+</div>
+								<p>Or if you want to keep it as a function call:</p>
+<div class="uk-grid tony-table">
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">template</span> <span style="color:#800080; ">&lt;</span><span style="color:#800000; font-weight:bold; ">typename</span> X<span style="color:#800080; ">&gt;</span>
+decltype<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">)</span> foo<span style="color:#808030; ">(</span>X<span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>forward<span style="color:#800080; ">&lt;</span>X<span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">template</span> <span style="color:#800080; ">&lt;</span><span style="color:#800000; font-weight:bold; ">typename</span> X<span style="color:#800080; ">&gt;</span>
+decltype<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">)</span> foo<span style="color:#808030; ">(</span>X<span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> fwd<span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+</div>
+								<p>It's important to know that <i>id-expressions</i> are always treated as <i>lvalues</i> to prevent implicitly double moving objects. However, there is an exception to this. When the <i>id-expression</i> is wrapped by itself in <span class="syntax">decltype</span> it has the same type as the declared parameter.
+								</p>
+								<p>Knowing this, we can use <span class="syntax">using</span> parameters to make a more concise interface for forwarding:
+<pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> fwd<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#800000; font-weight:bold; ">static_cast</span><span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+								<p>This is quite useful in generic lambdas where forwarding is a bit more of a pain because you don't have a name for the type.
+								</p>
+<div class="uk-grid tony-table">
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">auto</span> fn <span style="color:#808030; ">=</span> <span style="color:#808030; ">[</span><span style="color:#808030; ">]</span><span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> x<span style="color:#808030; ">,</span> <span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> y<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span><span style="color:#603000; ">pair</span><span style="color:#800080; ">{</span><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>forward<span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#808030; ">,</span>
+                   <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>forward<span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>y<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>y<span style="color:#808030; ">)</span><span style="color:#800080; ">}</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span><span style="color:#800080; ">;</span>
+</pre>
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">auto</span> fn <span style="color:#808030; ">=</span> <span style="color:#808030; ">[</span><span style="color:#808030; ">]</span><span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> x<span style="color:#808030; ">,</span> <span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> y<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span><span style="color:#603000; ">pair</span><span style="color:#800080; ">{</span>fwd<span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#808030; ">,</span> fwd<span style="color:#808030; ">(</span>y<span style="color:#808030; ">)</span><span style="color:#800080; ">}</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span><span style="color:#800080; ">;</span>
+</pre>
+</div>
+								<h2>Summary</h2>
+								<p>There is actually much more that we can do with <i>id-expressions</i>. In the next post we will look at hiding lambda syntax when we just want a call to an overloaded function.
+								</p>
+								<p>If you want to try out the <span class="syntax">fwd</span> example above, it is available on Compiler Explorer: <a href="https://godbolt.org/z/uPO4zl">https://godbolt.org/z/uPO4zl</a>
+								</p>
+                <p>Thanks for looking at this!</p>
+            </article>
+        </div>
+
+        <div class="uk-width-medium-1-4">
+            <div class="uk-panel uk-panel-box uk-text-center">
+                <img class="uk-border-circle" width="120" height="120" src="jason_profile.jpg" alt="">
+                <h3>Jason Rice</h3>
+                <p>Follow on Twitter<br/> 
+                  <a href="https://twitter.com/JasonRice_" >@JasonRice_</a></p>
+            </div>
+            <div class="uk-panel uk-panel-box ">
+                <h3>Parametric Expressions</h3>
+                <p>Parametric Expressions are a hygienic macro like language feature proposed for C++.
+                </p>
+                <p>Check it out!  <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1221r0.html" >P1221</a>
+                </p>
+            </div>
+        </div>
+  </div>
+</div>
+</body>
+
+<!-- UIkit JS 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.2/js/uikit.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.2/js/uikit-icons.min.js"></script>
+-->
+</body>
+</html>
