@@ -15,7 +15,7 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.0/css/uikit.min.css" />
   <link rel="stylesheet" href="style.css" />
 
-  <title>Typeless Functions (part 2)</title>
+  <title>Concise Forwarding</title>
   <style>
     .syntax {
       color:#000000;
@@ -51,11 +51,11 @@
                 <p class="uk-article-meta">
                   Written by Jason Rice on 25 January 2019.
                 </p>
-                <p>The topic of this blog is an experimental language feature called <i>Parametric Expressions</i>, but it's fun to call them "type less" functions as they have no type and they can lead to more concise code.
+                <p>The topic of this blog is an experimental language feature called <i>Parametric Expressions</i>, but it's fun to call them "type less" functions as they are like functions but have no type, and using them can lead to less typing on the keyboard.
                 </p>
                 <p>In the previous post we looked at how parametric expressions can return unexpanded parameter packs. It was brought to my attention that people don't know what parametric expressions are. For a complete description check out the proposal paper here: <a href="https://github.com/ricejasonf/parametric_expressions/blob/master/d1221.md">P1221</a>.
 								</p>
-								<p>However, for the sake of TLDR, I will start this post off with a brief explanation and the declaration syntax. Then I'll demonstrate how parametric expressions can be used to pass <i>id-expressions</i> which enables users to write more concise code without adding special operators to the language. For this post specifically we'll cover concise forwarding</p>
+								<p>However, for the sake of TLDR, I will start this post off with a brief explanation and the declaration syntax. Then I'll demonstrate how parametric expressions can be used to pass <i>id-expressions</i> which enable users to write more concise code without adding special operators to the language. For this post specifically we'll cover concise forwarding.</p>
                 <p>Basically parametric expressions are a hygienic macro that occur during semantic analysis and template instantiation. To prevent duplicate evaluation, the default behaviour is to bind arguments to parameters which are evaluated as they appear from left to right.
 								</p>
 								<p>Here is a very simple example of the declaration syntax:
@@ -73,9 +73,9 @@
 <pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">int</span> x <span style="color:#808030; ">=</span> foo<span style="color:#808030; ">(</span><span style="color:#008c00; ">5</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
 </pre>
 							  <p>Simple right? This is the default behaviour.</p>
-                <p>There are an abundance of use cases, however, where we sometimes want the parameter to behave more like a macro parameter. This means we can control evaluation and even work with what we are calling <i>placeholder expressions</i>, intermediate expressions that don't refer to an actual value. The name of an overloaded function is a good example.
+                <p>There are an abundance of use cases, however, where we sometimes want the parameter to behave more like a macro parameter. This means we can control evaluation and work with <i>placeholder expressions</i>, intermediate expressions that might not refer to an actual value. The name of an overloaded function is a good example.
 							  </p>
-                <p>For these <i>Parametric Expressions</i> adds the <span class="syntax">using</span> keyword to specify it in the parameter declaration.
+                <p>For these, <i>Parametric Expressions</i> adds the <span class="syntax">using</span> keyword to specify it in the parameter declaration.
 							  </p>
 <pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> foo<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
   <span style="color:#800000; font-weight:bold; ">return</span> x<span style="color:#800080; ">;</span>
@@ -96,7 +96,7 @@ decltype<span style="color:#808030; ">(</span><span style="color:#800000; font-w
 <span style="color:#800080; ">}</span>
 </pre>
 </div>
-								<p>Or if you want to keep it as a function call:</p>
+								<p>Or if you want to keep it as a function:</p>
 <div class="uk-grid tony-table">
 <pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">template</span> <span style="color:#800080; ">&lt;</span><span style="color:#800000; font-weight:bold; ">typename</span> X<span style="color:#800080; ">&gt;</span>
 decltype<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">)</span> foo<span style="color:#808030; ">(</span>X<span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
@@ -116,6 +116,7 @@ decltype<span style="color:#808030; ">(</span><span style="color:#800000; font-w
   <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#800000; font-weight:bold; ">static_cast</span><span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
 <span style="color:#800080; ">}</span>
 </pre>
+                <p>Note that both <span class="syntax">x</span>s are substituted with the input expression.</p>
 								<p>This is quite useful in generic lambdas where forwarding is a bit more of a pain because you don't have a name for the type.
 								</p>
 <div class="uk-grid tony-table">
