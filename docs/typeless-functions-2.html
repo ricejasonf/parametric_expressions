@@ -109,7 +109,7 @@ decltype<span style="color:#808030; ">(</span><span style="color:#800000; font-w
 <span style="color:#800080; ">}</span>
 </pre>
 </div>
-								<p>It's important to know that <i>id-expressions</i> are always treated as <i>lvalues</i> to prevent implicitly double moving objects. However, there is an exception to this. When the <i>id-expression</i> is wrapped by itself in <span class="syntax">decltype</span> it has the same type as the declared parameter.
+								<p>It's important to know that <i>id-expressions</i> are always treated as <i>lvalues</i> to prevent implicitly double moving objects. However, there is an exception to this. When the <i>id-expression</i> is wrapped by itself in <span class="syntax">decltype</span> it has the same type as the parameter it refers to.
 								</p>
 								<p>Knowing this, we can use <span class="syntax">using</span> parameters to make a more concise interface for forwarding:
 <pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> fwd<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> x<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
