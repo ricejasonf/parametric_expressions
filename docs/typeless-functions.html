@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="twitter:title" content="Typless Functions">
+  <meta name="twitter:description" content="Experimental language feature that can return parameter packs.">
+  <meta name="twitter:site" content="@JasonRice_">
+  <meta name="twitter:creator" content="@JasonRice_">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://ricejasonf.github.io/parametric_expressions/jason_profile.jpg">
+
+  <!-- UIkit CSS -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.0/css/uikit.min.css" />
+  <link rel="stylesheet" href="style.css" />
+
+  <title>Typeless Functions</title>
+  <style>
+    .syntax {
+      color:#000000;
+    }
+  </style>
+</head>
+<body>
+<body>
+  <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+    <nav class="uk-navbar uk-margin-large-bottom">
+        <a class="uk-navbar-brand uk-hidden-small"
+           href="index.html">
+          Parametric Expressions</a>
+        <ul class="uk-navbar-nav uk-hidden-small">
+            <li class="uk-active">
+                <a href="index.html">Blog</a>
+            </li>
+            <li>
+                <a href="https://github.com/ricejasonf/parametric_expressions">Github</a>
+            </li>
+            <li>
+                <a href="https://godbolt.org/z/Zo9ozy">Godbolt</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="uk-grid" data-uk-grid-margin>
+        <div class="uk-width-medium-3-4">
+            <article class="uk-article">
+                <h1 class="uk-article-title">
+                    <a href="#">Typeless Functions</a>
+                </h1>
+                <p class="uk-article-meta">
+                  Written by Jason Rice on 22 January 2019.
+                </p>
+                <p>Unlike function templates, parametric expressions do not create a type which means that arguments and return "values" do not require a concrete type either. We will refer to these typeless entities as <i>placeholder expressions</i>. A <i>placeholder expression</i> is an intermediate part of an expression that, by itself, does not refer to an actual value. The names of parameter packs, overloaded functions, as well as the name of parametric expressions themselves are examples of these.
+                </p>
+                <p>Here is the gratuitous TLDR Tony Table for this post:</p>
+
+<div class="uk-grid tony-table">
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>tuple xs<span style="color:#800080; ">{</span><span style="color:#008c00; ">1</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">2</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">3</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">4</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">5</span><span style="color:#800080; ">}</span><span style="color:#800080; ">;</span>
+<span style="color:#800000; font-weight:bold; ">int</span> sum <span style="color:#808030; ">=</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>apply<span style="color:#808030; ">(</span><span style="color:#808030; ">[</span><span style="color:#808030; ">]</span><span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> <span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">.</span>x<span style="color:#808030; ">)</span> <span style="color:#800080;">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#808030; ">(</span><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>forward<span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span> <span style="color:#808030; ">+</span> <span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+<span style="color:#800080;">}</span><span style="color:#808030; ">,</span> xs<span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+</pre>
+
+
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>tuple xs<span style="color:#800080; ">{</span><span style="color:#008c00; ">1</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">2</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">3</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">4</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">5</span><span style="color:#800080; ">}</span><span style="color:#800080; ">;</span>
+<span style="color:#800000; font-weight:bold; ">int</span> sum <span style="color:#808030; ">=</span> <span style="color:#808030; ">(</span>unpack<span style="color:#808030; ">(</span>xs<span style="color:#808030; ">)</span> <span style="color:#808030; ">+</span> <span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+</pre>
+</div>
+
+                <h2>Returning a Parameter Pack</h2>
+                <p>Parameter packs are named declarations that are ultimately expanded into a list of parameters that may be heterogenously typed. The C++ type system has no way to describe a pack so function templates cannot return one without expanding it first. With parametric expressions it becomes possible, and with this, parameter packs become closer to a language level tuple.
+                </p>
+<pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">template</span> <span style="color:#800080; ">&lt;</span><span style="color:#800000; font-weight:bold; ">typename</span><span style="color:#800080; ">&gt;</span>
+<span style="color:#800000; font-weight:bold; ">struct</span> int_seq_<span style="color:#800080; ">;</span>
+
+<span style="color:#800000; font-weight:bold; ">template</span> <span style="color:#800080; ">&lt;</span><span style="color:#800000; font-weight:bold; ">typename</span> T<span style="color:#808030; ">,</span> T <span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">.</span>i<span style="color:#800080; ">&gt;</span>
+<span style="color:#800000; font-weight:bold; ">struct</span> int_seq_<span style="color:#800080; ">&lt;</span><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>integer_sequence<span style="color:#808030; ">&lt;</span>T<span style="color:#808030; ">,</span> i<span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">&gt;</span><span style="color:#800080; ">&gt;</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">static</span> <span style="color:#800000; font-weight:bold; ">using</span> apply<span style="color:#808030; ">(</span><span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+    <span style="color:#800000; font-weight:bold; ">return</span> i<span style="color:#800080; ">;</span>
+  <span style="color:#800080; ">}</span>     <span style="color:#696969; ">// ^-- Unexpanded pack</span>
+<span style="color:#800080; ">}</span><span style="color:#800080; ">;</span>
+</pre>
+                <p>Here is a basic example that returns the list of integers in an <span class="syntax">std::integer_sequence</span> as a parameter pack. Seasoned metaprogrammers will recognize the pattern of using template specialization here to get a pack of indices. In practice this pattern is duplicated everywhere because the computations must occur locally as the packs must be expanded before returning. The above code can be used to replace the pattern and simply allow these packs to be created anywhere. A step further would be to replace the above with an intrinsic that avoids the creation of an <span class="syntax">std::integer_sequence</span>. For now we can just hide the scary template code with another parametric expression like this:
+                <p>
+<pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> int_seq<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> i<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> int_seq_<span style="color:#808030; ">&lt;</span><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>make_index_sequence<span style="color:#808030; ">&lt;</span>i<span style="color:#808030; ">&gt;</span><span style="color:#808030; ">&gt;</span><span style="color:#800080; ">::</span>apply<span style="color:#808030; ">(</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+                <h2>Unpacking a Tuple in Place</h2>
+                <p>Currently the function <span class="syntax">std::apply</span> can be used to apply computations to all of the values in a tuple. This requires your computations to occur within a function, and unsuprisingly this is what makes lambdas so useful. However, this can still be a bit cumbersome both for the compiler as well as the user. With what we have so far we can implement a replacement quite easily:
+<pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> unpack<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> tuple<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>get<span style="color:#800080; ">&lt;</span>int_seq<span style="color:#808030; ">(</span><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>tuple_size_v<span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>tuple<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>tuple<span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+      <span style="color:#696969; ">// ^-- Unexpanded pack</span>
+<span style="color:#800080; ">}</span>
+</pre>
+                <p>Note that what we are returning here is an expression containing an unexpanded parameter pack.
+                </p>
+
+                <h2>Summary</h2>
+                <p>In simple terms, this post has revealed how parametric expressions may open the door to operations on parameter packs. For the next few posts, I would like demonstrate some of the other well-proven use cases for parametric expressions, but during the course of writing this, something occurred to me. A parameter pack is a compile-time product in terms of algebraic data types. What if we could use a ternary compile-time product to represent a run-time sum type that avoids the intermediate storage properties of an actual sum type like <span class="syntax">std::variant</span>. This could vastly simplify the recursive visitation pattern I was using in <a href="https://github.com/ricejasonf/nbdl">Nbdl</a> or that is typically seen in monadic interfaces.
+                <p>Thanks for looking at this!</p>
+            </article>
+        </div>
+
+        <div class="uk-width-medium-1-4">
+            <div class="uk-panel uk-panel-box uk-text-center">
+                <img class="uk-border-circle" width="120" height="120" src="jason_profile.jpg" alt="">
+                <h3>Jason Rice</h3>
+                <p>Follow on Twitter<br/> 
+                  <a href="https://twitter.com/JasonRice_" >@JasonRice_</a></p>
+            </div>
+            <div class="uk-panel uk-panel-box ">
+                <h3>Parametric Expressions</h3>
+                <p>Parametric Expressions are a hygienic macro like language feature proposed for C++.
+                </p>
+                <p>Check it out!  <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1221r0.html" >P1221</a>
+                </p>
+            </div>
+        </div>
+  </div>
+</div>
+</body>
+
+<!-- UIkit JS 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.2/js/uikit.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.2/js/uikit-icons.min.js"></script>
+-->
+</body>
+</html>

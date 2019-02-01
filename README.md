@@ -1,26 +1,14 @@
-git@github.com:ricejasonf/clang.git
+# Parametric Expressions
 
-branch:     parmexpr
+Parametric Expressions are a hygienic macro like language feature proposed for C++.
 
-wip branch: f_alias
+Check it out! [P1221](https://github.com/ricejasonf/parametric_expressions/blob/master/d1221.md)
 
+### Play
 
-llvm
+In addition to the tests in `./play` you can try out the reference implementation on Compiler Explorer
+[here](https://godbolt.org/z/Zo9ozy).
 
-https://github.com/llvm-mirror/llvm.git
+You can also use [CppDock](https://github.com/ricejasonf/cppdock) to build the compiler in a docker container in `./toolchain`.
 
-sha: e90d44039a60317e8379232d5c43dc06cef8f463
-
-I don't think these ones are required:
-
-libcxx
-
-https://github.com/llvm-mirror/libcxx.git
-
-sha: 61b0a0088b54793b2d4e7fc2f1b1a1f3893293a8
-
-libcxxabi
-
-https://github.com/llvm-mirror/libcxxabi.git
-
-sha: bd80f6625dec55d43bab409ab0b71b94472eff28
+There are also compile-time benchmarks that can be built found in `./metabench`. Results will be posted on the [Blog](https://ricejasonf.github.io/parametric_expressions/).
