@@ -15,3 +15,12 @@ vanilla_run:
 
 vanilla_push:
 	docker push ricejasonf/parmexpr-vanilla
+
+emscripten_image:
+	docker build --force-rm=true -f ./Dockerfile-emscripten \
+															 -t ricejasonf/parmexpr-emscripten .
+emscripten_run:
+	docker run--rm -it ricejasonf/parmexpr-emscripten
+
+emscripten_push:
+	docker push ricejasonf/parmexpr-emscripten
