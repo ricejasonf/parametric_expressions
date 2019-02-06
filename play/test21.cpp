@@ -38,6 +38,7 @@ int main() {
   static_assert(not std::is_same_v<decltype(pair.first), decltype(pair.second)>);
 
   assert(lam([](auto x) { return x; })(102) == 102);
+  assert(lam([](auto x) { return x; })('c') == 'c');
 
   assert(double_lam([](auto x) { return x; })(1234) == 1234);
 }
