@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="twitter:title" content="Typeless Functions (part 3)">
+  <meta name="twitter:description" content="Fun with Placeholder Expressions">
+  <meta name="twitter:site" content="@JasonRice_">
+  <meta name="twitter:creator" content="@JasonRice_">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://ricejasonf.github.io/parametric_expressions/jason_profile.jpg">
+
+  <!-- UIkit CSS -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.0/css/uikit.min.css" />
+  <link rel="stylesheet" href="style.css" />
+
+  <title>Fun with Placeholder Expressions</title>
+  <style>
+    .syntax {
+      color:#000000;
+    }
+  </style>
+</head>
+<body>
+<body>
+  <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+    <nav class="uk-navbar uk-margin-large-bottom">
+        <a class="uk-navbar-brand uk-hidden-small"
+           href="index.html">
+          Parametric Expressions</a>
+        <ul class="uk-navbar-nav uk-hidden-small">
+            <li class="uk-active">
+                <a href="index.html">Blog</a>
+            </li>
+            <li>
+                <a href="https://github.com/ricejasonf/parametric_expressions">Github</a>
+            </li>
+            <li>
+                <a href="https://godbolt.org/z/Zo9ozy">Godbolt</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="uk-grid" data-uk-grid-margin>
+        <div class="uk-width-medium-3-4">
+            <article class="uk-article">
+                <h1 class="uk-article-title">
+                    <a href="#">Typeless Functions (part 3)</a>
+                </h1>
+                <p class="uk-article-meta">
+                  Written by Jason Rice on 2 February 2019.
+                </p>
+                <p>The topic of this blog is an experimental language feature called <i>Parametric Expressions</i>. If you are not familiar with them, check out the <a href="typeless-functions-2.html">previous post</a> which covers the basics of how they work. The very first post in this series covered how parametric expressions can work with <i>placeholder expressions</i> to return unexpanded parameter packs. This post will cover some interesting use cases that don't involve packs.
+                </p>
+                <h2>Fun with Placeholder Expressions</h2>
+                <p>As stated before, <i>placeholder expressions</i> are intermediate expressions that don't have a type or refer to a value. The most obvious example of these is the name of an overloaded function.
+                </p>
+                <p>Consider this TonyTable™:</p>
+<div class="uk-grid tony-table">
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">auto</span> result <span style="color:#808030; ">=</span> reduce<span style="color:#808030; ">(</span><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>forward<span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>xs<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>xs<span style="color:#808030; ">)</span><span style="color:#808030; ">,</span>
+  <span style="color:#008c00; ">0</span><span style="color:#808030; ">,</span>
+  <span style="color:#808030; ">[</span><span style="color:#808030; ">]</span><span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> x<span style="color:#808030; ">,</span> <span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> y<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+    <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span><span style="color:#603000; ">max</span><span style="color:#808030; ">(</span><span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>forward<span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>x<span style="color:#808030; ">)</span><span style="color:#808030; ">,</span>
+                    <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>forward<span style="color:#800080; ">&lt;</span>decltype<span style="color:#808030; ">(</span>y<span style="color:#808030; ">)</span><span style="color:#800080; ">&gt;</span><span style="color:#808030; ">(</span>y<span style="color:#808030; ">)</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+  <span style="color:#800080; ">}</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+</pre>
+<pre class="uk-width-1-2" style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">auto</span> result <span style="color:#808030; ">=</span> reduce<span style="color:#808030; ">(</span>fwd<span style="color:#808030; ">(</span>xs<span style="color:#808030; ">)</span><span style="color:#808030; ">,</span> <span style="color:#008c00; ">0</span><span style="color:#808030; ">,</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span><span style="color:#603000; ">max</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+</pre>
+</div>
+                <div><a href="https://godbolt.org/z/AI-YVb">https://godbolt.org/z/AI-YVb</a></div>
+								<p>The above demonstrates how we can pass an overloaded function without wrapping it in a lambda. The example isn't perfect because <span class="syntax">std::max</span> doesn't need the forwarding as it works with const references, but I wanted to show it anyways and with a function in the standard library. I'm also cheating because I am just passing 0 for an initial or default value.
+								</p>
+                <p>Here is the implementation of <span class="syntax">reduce</span> and a helper <span class="syntax">lam</span> that lifts things into a lambda so it can be passed as an invokable object.
+                </p>
+
+<pre style="color:#000000;background:#ffffff;"><span style="color:#800000; font-weight:bold; ">using</span> lam<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> fn<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#808030; ">[</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">]</span><span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span><span style="color:#808030; ">&amp;</span><span style="color:#808030; ">&amp;</span> <span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">.</span>args<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+    <span style="color:#800000; font-weight:bold; ">return</span> fn<span style="color:#808030; ">(</span>fwd<span style="color:#808030; ">(</span>args<span style="color:#808030; ">)</span><span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">.</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+  <span style="color:#800080; ">}</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+
+<span style="color:#800000; font-weight:bold; ">using</span> reduce<span style="color:#808030; ">(</span><span style="color:#800000; font-weight:bold; ">auto</span> range<span style="color:#808030; ">,</span> <span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> init<span style="color:#808030; ">,</span>
+             <span style="color:#800000; font-weight:bold; ">using</span> <span style="color:#800000; font-weight:bold; ">auto</span> bin_op<span style="color:#808030; ">)</span> <span style="color:#800080; ">{</span>
+  <span style="color:#800000; font-weight:bold; ">return</span> <span style="color:#666616; ">std</span><span style="color:#800080; ">::</span>reduce<span style="color:#808030; ">(</span>fwd<span style="color:#808030; ">(</span>range<span style="color:#808030; ">)</span><span style="color:#808030; ">.</span>begin<span style="color:#808030; ">(</span><span style="color:#808030; ">)</span><span style="color:#808030; ">,</span> fwd<span style="color:#808030; ">(</span>range<span style="color:#808030; ">)</span><span style="color:#808030; ">.</span>end<span style="color:#808030; ">(</span><span style="color:#808030; ">)</span><span style="color:#808030; ">,</span>
+                     init<span style="color:#808030; ">,</span> lam<span style="color:#808030; ">(</span>bin_op<span style="color:#808030; ">)</span><span style="color:#808030; ">)</span><span style="color:#800080; ">;</span>
+<span style="color:#800080; ">}</span>
+</pre>
+								<p>Once again, please disregard the use of <span class="syntax">auto</span> in the declaration syntax. It was meant to be a placeholder for a constraint, and it does not specify a type. We are rolling with it for now though.
+								</p>
+                <p>Remember that <span class="syntax">using</span> params behave like a macro, so take note that <span class="syntax">range</span> is not declared with the <span class="syntax">using</span> specifier. This means that its input expression is bound to a variable of reference type because it would otherwise be evaluated twice as you would see in a macro. Because it is stored, its input cannot be a <i>placeholder expression</i>.
+								<h2>Summary</h2>
+                <p>Thanks for looking at this!</p>
+            </article>
+        </div>
+
+        <div class="uk-width-medium-1-4">
+            <div class="uk-panel uk-panel-box uk-text-center">
+                <img class="uk-border-circle" width="120" height="120" src="jason_profile.jpg" alt="">
+                <h3>Jason Rice</h3>
+                <p>Follow on Twitter<br/> 
+                  <a href="https://twitter.com/JasonRice_" >@JasonRice_</a></p>
+            </div>
+            <div class="uk-panel uk-panel-box ">
+                <h3>Parametric Expressions</h3>
+                <p>Parametric Expressions are a hygienic macro like language feature proposed for C++.
+                </p>
+                <p>Check it out!  <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1221r0.html" >P1221</a>
+                </p>
+            </div>
+        </div>
+  </div>
+</div>
+</body>
+
+<!-- UIkit JS 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.2/js/uikit.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.2/js/uikit-icons.min.js"></script>
+-->
+</body>
+</html>
