@@ -2,7 +2,7 @@
 
 cppdock install_src e90d44039a60317e8379232d5c43dc06cef8f463 \
                     llvm-mirror/llvm      ./llvm
-cppdock install_src 34acce8b4e63b7609f9df373d0d69afc5ad2195b \
+cppdock install_src a1ec34ea4750e2688ad0e60faceffa035d36aeda \
                     ricejasonf/clang      ./llvm/tools/clang
 cppdock install_src 61b0a0088b54793b2d4e7fc2f1b1a1f3893293a8 \
                     llvm-mirror/libcxx    ./llvm/projects/libcxx
