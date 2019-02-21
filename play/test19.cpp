@@ -31,7 +31,7 @@ struct my_array {
   }
 };
 
-using foo(auto ...x) { }
+using foo(auto ...x) { };
 
 int main() {
   {
@@ -55,7 +55,6 @@ int main() {
 
     int sum = (xs~ + ...);
     assert(sum == 10);
-
   }
   {
     // this would construct a my_array 5 times
