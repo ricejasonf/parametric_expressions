@@ -3,7 +3,7 @@ FROM ricejasonf/cppdock as parmexpr_build
   RUN cppdock install_src 2a333e6b14e94de7fa32dd0a772886d028515708 \
                           emscripten-core/emscripten-fastcomp \
                           ./emscripten-fastcomp \
-   && cppdock install_src b6fee60c2c6c30c7f866ae4f3f1f4fec2ce3dd3e \
+   && cppdock install_src 58780084fa70da420bc4eddc99b323b4095383b4 \
                           ricejasonf/emscripten-fastcomp-clang \
                           ./emscripten-fastcomp/tools/clang \
    && cppdock install_src 61b0a0088b54793b2d4e7fc2f1b1a1f3893293a8 \
