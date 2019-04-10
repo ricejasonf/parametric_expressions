@@ -1,4 +1,6 @@
 build
+build_release
 play/build
 llvm
 install
+install_release
