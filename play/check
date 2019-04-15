@@ -1,22 +1,22 @@
-make run_test0
-make run_test2
-make run_test3
-make run_test4
-make run_test5
-make run_test6
-make run_test7
-make run_test8
-make run_test9
-make run_test10
-make run_test11
-make run_test12
-make run_test13
-make run_test14
-make run_test15
-make run_test16
-make run_test17
-make run_test18
-make run_test19
-make run_test20
-make run_test21
+make run_test0 && \
+make run_test2 && \
+make run_test3 && \
+make run_test4 && \
+make run_test5 && \
+make run_test6 && \
+make run_test7 && \
+make run_test8 && \
+! make run_test9 && \
+make run_test10 && \
+make run_test11 && \
+make run_test12 && \
+make run_test13 && \
+make run_test14 && \
+make run_test15 && \
+make run_test16 && \
+make run_test17 && \
+make run_test18 && \
+make run_test19 && \
+make run_test20 && \
+make run_test21 && \
 make run_test22

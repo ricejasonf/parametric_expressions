@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 
@@ -16,4 +17,5 @@ int main() {
   int x = 42;
   int y = if_(x >= 42, print(x), print(5));
   void(print(y));
+  assert(y == 47);
 }
