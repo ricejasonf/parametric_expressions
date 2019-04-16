@@ -2,9 +2,7 @@
 // Test transparent AST node
 
 #include <cassert>
-#include <utility>
-
-struct blah { };
+#include <type_traits>
 
 using twice(using auto x) { return x * 2; }
 
@@ -13,13 +11,14 @@ auto foo(T x) {
   return twice(x);
 }
 
-template <typename T>
 auto foo(...) {
   return "not implemented";
 }
 
+struct blah { };
+
 int main() {
-  constexpr auto x = foo(1);
+  constexpr auto x = twice(1);
   assert(foo(3) == 6); // OK
   assert(foo(blah{}) == "not implemented"); // OK, would normally be an error
 }
