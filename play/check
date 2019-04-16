@@ -19,4 +19,5 @@ make run_test18 && \
 make run_test19 && \
 make run_test20 && \
 make run_test21 && \
-make run_test22
+make run_test22 && \
+make run_test23
