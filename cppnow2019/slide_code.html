@@ -1,0 +1,80 @@
+<html>
+<head>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/routeros.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<style>
+body {
+    background-color:#8121ff;
+    color:white;
+}
+</style>
+</head>
+<body>
+<h1>Declaration Syntax</h1>
+<pre><code class="cpp">
+using add(x, y) = x + y;
+</code></pre>
+
+<pre><code class="cpp">
+using add(constexpr x,
+          constexpr y) = x + y;
+</code></pre>
+
+<h1>Parameter Kinds</h1>
+
+<pre><code class="cpp">
+  using add(a, b) = a + b;
+
+  int i = 40;
+  int x = add(i++, 2);
+
+  // the same as
+
+  int i = 40;
+  int x = ({
+    auto& a = i++;
+    auto&& b = 2;
+    a + b; // result of expression
+  });
+</code></pre>
+
+<pre><code class="cpp">
+  using add(constexpr a,
+            constexpr b) = a + b;
+
+  constexpr int i = 40;
+  constexpr int x = add(i, 2);
+
+  // the same as
+
+  constexpr int i = 40;
+  constexpr int x = ({
+    constexpr auto a = i;
+    constexpr auto b = 2;
+    a + b; // result of expression
+  });
+</code></pre>
+
+<pre><code class="cpp">
+  using add(using a,
+            using b) = a + b;
+
+  int i = 40;
+  int x = add(i, 2);
+
+  // the same as
+
+  int i = 40;
+  int x = i + 2;
+</code></pre>
+
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+  document.querySelectorAll('pre code').forEach((block) => {
+    hljs.highlightBlock(block);
+  });
+});
+</script>
+</body>
+</html>
