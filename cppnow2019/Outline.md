@@ -4,11 +4,11 @@
   - Declaration Syntax
   - Kinds of Parameters
   - Self Parameter
+  - Operator Overloading
+  - Static Operators
   - Transparent Transformations
   - RAII Scope
-  - Overloading
-  - Operator Overloading
-  - Static Operator Overload
+  - Overloading with Functions??
 
 ## Motivating Use Cases
   - Constexpr Parameters

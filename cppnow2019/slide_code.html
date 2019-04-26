@@ -69,6 +69,81 @@ using add(constexpr x,
   int x = i + 2;
 </code></pre>
 
+<pre><code class="cpp">
+  struct foo {
+    int x;
+    using bar(this self, x) = self.x + x;
+  };
+
+  struct foo {
+    int x;
+    using bar(using this self, x) = self.x + x;
+  };
+
+  struct foo {
+    int x;
+    using bar(constexpr this self, x) = self.x + x;
+  };
+
+  struct foo {
+    int x;
+    using bar(this constexpr self, x) = self.x + x;
+  };
+
+  struct foo {
+    static using bar(x, y) = x + y;
+  };
+</code></pre>
+
+<h1>Operator Overloading</h1>
+
+<pre><code class="cpp">
+  namespace mine {
+    using foo(x, y) = hana::equal(fwd(x), fwd(y));
+  }
+
+  struct id_fn {
+    using operator()(this self, x) = x;
+  };
+
+  int x = id_fn{}(42);
+
+  struct id_fn {
+    static using operator()(x) = x;
+  };
+
+  int x = id_fn{}(42);
+</code></pre>
+
+<h1>Transparent Context</h1>
+<pre><code class="cpp">
+  // (Taken from http://ldionne.com/P1221-presentation/#/9)
+  // Test transparent AST node
+
+  #include <cassert>
+  #include <type_traits>
+
+  using twice(using x) = return x * 2;
+
+  template &lt;typename T,
+            typename = decltype(twice(std::declval<T>()))&gt;
+  auto foo(T x) {
+    return twice(x);
+  }
+
+  auto foo(...) {
+    return "not implemented";
+  }
+
+  struct blah { };
+
+  int main() {
+    constexpr auto x = twice(1);
+    assert(foo(3) == 6); // OK
+    assert(foo(blah{}) == "not implemented"); // OK, would normally be an error
+  }
+</code></pre>
+
 <script>
 document.addEventListener('DOMContentLoaded', (event) => {
   document.querySelectorAll('pre code').forEach((block) => {
