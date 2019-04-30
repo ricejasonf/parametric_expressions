@@ -120,13 +120,13 @@ using add(constexpr x,
   // (Taken from http://ldionne.com/P1221-presentation/#/9)
   // Test transparent AST node
 
-  #include <cassert>
-  #include <type_traits>
+  #include &lt;cassert&gt;
+  #include &lt;type_traits&gt;
 
   using twice(using x) = return x * 2;
 
   template &lt;typename T,
-            typename = decltype(twice(std::declval<T>()))&gt;
+            typename = decltype(twice(std::declval&lt;T&gt;()))&gt;
   auto foo(T x) {
     return twice(x);
   }
@@ -142,6 +142,243 @@ using add(constexpr x,
     assert(foo(3) == 6); // OK
     assert(foo(blah{}) == "not implemented"); // OK, would normally be an error
   }
+</code></pre>
+
+<h1>RAII Scope</h1>
+<pre><code class="cpp">
+  using add(a, b) = a + b;
+
+  using add(a, b) { return a + b; }
+
+  using if_(cond, a, b) {
+    if (cond) {
+      return a;
+    } else {
+      return b;
+    }
+  }
+
+  using if_(cond, a, b) = cond ? a : b;
+
+  using constexpr_if(using cond, using a, using b) {
+    if constexpr(cond) {
+      return a;
+    } else {
+      return b;
+    }
+  }
+</code></pre>
+
+<h1>Parameter Packs</h1>
+<pre><code class="cpp">
+  using to_pack(...x) = x;
+
+  int sum = (to_pack(1, 2, 3) + ...);
+  assert(sum == 6);
+
+  [](auto x) {
+    return (to_pack(x) + ...);
+  };
+
+  // postfix tilde
+
+  using to_pack(...x)~ = x;
+
+  int sum = (to_pack(1, 2, 3)~ + ...);
+  assert(sum == 6);
+
+  [](auto x) {
+    return (to_pack(x)~ + ...);
+  };
+</code></pre>
+<pre><code class="cpp">
+  struct foo {
+    int member1;
+    int member2;
+
+    using operator()~(using this self) {
+      return to_pack~(self.member1,
+                      self.member2);
+    }
+  };
+
+  foo xs = {4, 2};
+  assert((xs~ + ...) == 6);
+         // ^ unary postfix tilde expands to pack
+
+  assert((foo{4, 2}~ + ...) == 6);
+       // ^^^^^^^^^ operand is subject to duplicate evaluation
+</code></pre>
+
+<h1>Structured Bindings as a Pack</h1>
+<pre><code class="cpp">
+  std::tuple<X, Y, Z> f();
+  auto [x,y,z] = f();          // OK today
+  auto [...xs] = f();          // proposed: xs is a pack of length three containing an X, Y, and a Z
+  auto [x, ...rest] = f();     // proposed: x is an X, rest... is a pack of length two
+  auto [x,y,z, ...rest] = f(); // proposed: rest... is an empty pack
+  auto [x, ...rest, z] = f();  // ill-formed: non-trailing pack. This is for consistency with, for instance, function parameter packs
+
+  using drop_front(x, ...rest)~ = rest;
+</code></pre>
+
+<h1>Overloading With Functions</h1>
+<pre><code class="cpp">
+auto  id(int x) { return x; }
+using id(x) = x;
+
+
+</code></pre>
+
+<h1>Concise Forwarding</h1>
+<pre><code class="cpp">
+
+  #define fwd(x) static_cast&lt;decltype(x)&gt;(x) 
+  using fwd(using x) = static_cast&lt;decltype(x)&gt;(x);
+
+  auto old_f = [](auto&amp;&amp; x) { use(std::forward&lt;decltype(x)&gt;(x)); };
+  auto new_f = [](auto&amp;&amp; x) { use(fwd(x)); };
+
+  template &lt;typename X&gt;
+  decltype(auto) foo(X&amp;&amp; x) 
+    noexcept(noexcept(std::forward&lt;X&gt;(x)))
+    -> decltype(std::forward&lt;X&gt;(x))
+  {
+    return std::forward&lt;X&gt;(x);
+  }
+
+  using foo(using x) = x;
+
+</code></pre>
+<h1>Constexpr Ternary</h1>
+<pre><code class="cpp">
+  using constexpr_if(constexpr auto cond,
+                     using x,
+                     using y)
+    = constexpr_if_&lt;cond&gt;::apply(x, y);
+
+  auto x = constexpr_if(true, int{42}, std::make_unique&lt;int&gt;(42));
+                                    // ^ not evaluated
+</code></pre>
+<h1>Debug Logging</h1>
+<pre><code class="cpp">
+  namespace log {
+    struct null_stream {
+      using operator&lt;&lt;(using) = null_stream{};
+    };
+
+    using warn() {
+      if constexpr (log_level == Warning)
+        return std::wcerr;
+      else
+        return null_stream{};
+    }
+  }
+
+  if (foo &gt; 42)
+    log::warn() &lt;&lt; "Foo is too large: " &lt;&lt; foo &lt;&lt; '\n';
+
+</code></pre>
+<h1>Disjunction</h1>
+<pre><code class="cpp">
+  #include &lt;string&gt;
+
+  struct foo {
+    std::string value;
+    using operator||(this self, using x)
+      = (self.value.length() &gt; 0) ? self : x;
+  };
+
+  foo x = {"hello"};
+  foo y = x || foo{"world"};
+            // ^ lazily constructed
+</code></pre>
+
+<h1>Conjunction</h1>
+<pre><code class="cpp">
+  #include &lt;iostream&gt;
+  #include &lt;string_view&gt;
+
+  struct guard {
+    using operator&amp;&amp;(this self, using LAZY_X) {
+      if (!self.is_stopped) {
+        decltype(auto) x = LAZY_X;
+        std::cout &lt;&lt; x &lt;&lt; '\n';
+        if (std::string_view(x) == std::string_view("stop"))
+          self.is_stopped = true;
+      }
+      return self;
+    }
+
+    bool is_stopped = false;
+  };
+
+  int main() {
+    auto g = guard{} &amp;&amp; "pass1"
+                     &amp;&amp; "pass2"
+                     &amp;&amp; "pass3"
+                     &amp;&amp; "stop"
+                     &amp;&amp; "this is not printed";
+</code></pre>
+
+<h1>Friendly Interfaces (CTRE)</h1>
+<pre><code class="cpp">
+  #include "ctre.hpp"
+  #include &lt;string_view&gt;
+
+  using match(using x, using sv) {
+      static constexpr auto pattern = ctll::basic_fixed_string{ x };
+      return ctre::re&lt;pattern&gt;().match(sv);
+  }
+
+
+  bool result =  match("Hello.*", "Hello World");
+</code></pre>
+
+<h1>Friendly Interfaces (format)</h1>
+<pre><code class="cpp">
+  template&lt;class... Args&gt;
+  string format(string_view fmt, const Args&amp;... args);
+
+  string message = format("The answer is {}.", 42);
+</code></pre>
+
+<h1>Passing Overloaded Functions</h1>
+<pre><code class="cpp">
+  auto result = reduce(std::forward&lt;decltype(xs)&gt;(xs),
+  0,
+  [](auto&amp;&amp; x, auto&amp;&amp; y) {
+    return std::max(std::forward&lt;decltype(x)&gt;(x),
+                    std::forward&lt;decltype(y)&gt;(y));
+  });
+
+  // parmexpr
+  auto result = reduce(fwd(xs), 0, std::max);
+</code></pre>
+
+<h1>Fake Language Tuple</h1>
+<pre><code class="cpp">
+  auto tuples = make_tuples(xs, ys, {84, 10.0f, foo{10}});
+
+  // direct-list-initialization
+  std::tuple xs{42, 5.0f, foo{5}};
+
+  // copy-list-initialization
+  std::tuple ys = {42, 5.0f, foo{5}};
+
+  using init_tuple(using tup) {
+    std::tuple xs = tup;
+    return xs;
+  }
+
+  using make_tuples(using ...tups)
+    = std::tuple{init_tuple(tups)...};
+
+</code></pre>
+
+<h1>TODO</h1>
+<pre><code class="cpp">
+
 </code></pre>
 
 <script>
