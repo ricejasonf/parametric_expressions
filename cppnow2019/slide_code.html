@@ -68,6 +68,16 @@ using add(constexpr x,
   int i = 40;
   int x = i + 2;
 </code></pre>
+<pre><code class="cpp">
+  using twice(using x) = x * 2;
+
+  static_assert(twice(2) == 4);
+
+  static_assert(4 + 2 * 2 == 8);
+
+  static_assert((4 + 2) * 2 == 12);
+  static_assert(twice(4 + 2) == 12);
+</code></pre>
 
 <pre><code class="cpp">
   struct foo {
@@ -123,7 +133,7 @@ using add(constexpr x,
   #include &lt;cassert&gt;
   #include &lt;type_traits&gt;
 
-  using twice(using x) = return x * 2;
+  using twice(using x) = x * 2;
 
   template &lt;typename T,
             typename = decltype(twice(std::declval&lt;T&gt;()))&gt;
@@ -196,10 +206,8 @@ using add(constexpr x,
     int member1;
     int member2;
 
-    using operator()~(using this self) {
-      return to_pack~(self.member1,
-                      self.member2);
-    }
+    using operator()~(using this self) = to_pack~(self.member1,
+                                                  self.member2);
   };
 
   foo xs = {4, 2};
@@ -208,6 +216,14 @@ using add(constexpr x,
 
   assert((foo{4, 2}~ + ...) == 6);
        // ^^^^^^^^^ operand is subject to duplicate evaluation
+</code></pre>
+
+<pre><code class="cpp">
+template &lt;auto ...i&gt;
+struct integer_sequence {
+  using operator()~(this x) = i;
+  // ...
+};
 </code></pre>
 
 <h1>Structured Bindings as a Pack</h1>
@@ -220,6 +236,16 @@ using add(constexpr x,
   auto [x, ...rest, z] = f();  // ill-formed: non-trailing pack. This is for consistency with, for instance, function parameter packs
 
   using drop_front(x, ...rest)~ = rest;
+</code></pre>
+
+<h1>Packs of Packs</h1>
+<pre><code class="cpp">
+using iota(N) = /* ... */;
+
+template&lt;size_t N&gt;
+void baz() {
+  return sum(iota(iota(N)~)~ ...);  // Uh-oh!
+}
 </code></pre>
 
 <h1>Overloading With Functions</h1>
@@ -321,6 +347,18 @@ using id(x) = x;
                      &amp;&amp; "this is not printed";
 </code></pre>
 
+<h1>Towards Lazy Parameterr Paper</h1>
+<pre><code class="cpp">
+  int log(bool, [] ‐&gt; std::string message);
+
+  log(value &gt; threshold,
+    std::to_string(value) + “ exceeds “ + std::to_string(threshold));
+
+  int log(bool condition, [] ‐&gt; std::string message) {
+    if (condition) std::cerr &lt;&lt; message() &lt;&lt; std::endl;
+  }
+</code></pre>
+
 <h1>Friendly Interfaces (CTRE)</h1>
 <pre><code class="cpp">
   #include "ctre.hpp"
@@ -376,10 +414,90 @@ using id(x) = x;
 
 </code></pre>
 
-<h1>TODO</h1>
+<h1>hana::at_t</h1>
 <pre><code class="cpp">
+  struct at_t {
+    template &lt;typename Xs&gt;
+    using Tag = typename hana::tag_of&lt;Xs&gt;::type;
 
+    template &lt;typename It&gt;
+    using Impl = BOOST_HANA_DISPATCH_IF(at_impl&lt;It&gt;,
+      hana::Iterable&lt;It&gt;::value);
+
+    static using operator()(using xs, using n) =
+      Impl&lt;Tag&lt;decltype(xs)&gt;&gt;::apply(xs, n);
+  };
+  
+// orig
+  template &lt;typename Xs, typename N&gt;
+  constexpr decltype(auto) at_t::operator()(Xs&& xs, N const& n) const {
+    using It = typename hana::tag_of&lt;Xs&gt;::type;
+    using At = BOOST_HANA_DISPATCH_IF(at_impl&lt;It&gt;,
+      hana::Iterable&lt;It&gt;::value
+    );
+
+    return At::apply(static_cast&lt;Xs&&&gt;(xs), n);
+  }
 </code></pre>
+
+<h1>hana::at_impl</h1>
+<pre><code class="cpp">
+  template &lt;&gt;
+  struct at_impl&lt;basic_tuple_tag&gt; {
+    static using apply(using xs, using n) =
+      static_cast&lt;detail::fwd_cast_t&lt;
+        typename detail::decay&lt;decltype(xs)&gt;::type
+          ::template ebo_t&lt;static_cast&lt;size_t&gt;(n)&gt;,
+        decltype((xs))&gt;&gt;(xs).get();
+  };
+  // orig
+  template &lt;&gt;
+  struct at_impl&lt;basic_tuple_tag&gt; {
+    template &lt;typename Xs, typename N&gt;
+    static constexpr decltype(auto) apply(Xs&& xs, N const&) {
+    constexpr std::size_t index = N::value;
+    return detail::ebo_get&lt;detail::bti&lt;index&gt;&gt;(static_cast&lt;Xs&&&gt;(xs));
+    }
+  };
+</code></pre>
+
+<h1>hana::at_c</h1>
+<pre><code class="cpp">
+  template &lt;std::size_t n&gt;
+  struct at_c_fn {
+    static using operator()(using xs) =
+      hana::at(xs, hana::size_t&lt;n&gt;{});
+  };
+
+  template &lt;std::size_t n&gt;
+  inline constexpr at_c_fn&lt;n&gt; at_c{};
+</code></pre>
+
+<h1>hana::basic_tuple::ebo_t</h1>
+<pre><code class="cpp">
+  template &lt;std::size_t i&gt;
+  using ebo_t = ebo&lt;bti&lt;i&gt;, __type_pack_element&lt;i, Xn...&gt;&gt;;
+</code></pre>
+
+<h1>hana::detail::ebo</h1>
+<pre><code class="cpp">
+  // Specialize storage for non-empty types
+  template &lt;typename K, typename V&gt;
+  struct ebo&lt;K, V, false&gt; {
+      constexpr ebo() : data_() { }
+
+      template &lt;typename T&gt;
+      explicit constexpr ebo(T&& t)
+          : data_(static_cast&lt;T&&&gt;(t))
+      { }
+
+      V data_;
+
+      // this gets instantiated for every K, V
+      using get(using this self) = return (self.data_);
+  };
+</code></pre>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', (event) => {
